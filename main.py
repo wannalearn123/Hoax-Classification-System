@@ -5,6 +5,7 @@ from fastapi import Body, FastAPI, UploadFile
 from PIL import Image
 
 from classifier import predict, preprocessing
+from fetch import cnn_indo, kompas
 
 app = FastAPI()
 
@@ -15,10 +16,10 @@ def read_root():
 
 
 @app.post("/predict_word")
-async def predict_hoax(payload: str = Body(None, media_type="text/plain")):
+async def predict_hoax(payload: str = Body(media_type="text/plain")):
     result = preprocessing(payload)
     result = predict(result)
-    return {"received": result}
+    return result
 
 
 @app.post("/predict_pict")
@@ -29,3 +30,10 @@ async def predict_hoax_pict(payload: UploadFile):
     text = preprocessing(text)
     result = predict(text)
     return result
+
+
+@app.post("/fetch")
+async def fetch_news(payload: str = Body(media_type="text/plain")):
+    result = cnn_indo(payload)
+    result2 = kompas(payload)
+    return result[0], result2[0]

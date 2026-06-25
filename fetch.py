@@ -12,8 +12,8 @@ def kompas(keyword):
     for a in articles:
         a_title = a.h2.text.strip()
         a_text = a.p.text
-        result.append(f"{a_title}, {a_text}")
-    return result
+        result.append(f"{a_title} {a_text}")
+    return result[:10]
 
 
 def cnn_indo(keyword):
@@ -27,9 +27,8 @@ def cnn_indo(keyword):
     data = r.json()["data"]
     result = []
     for d in data:
-        result.append(f"{d['strjudul']}, {d['strringkasan']}")
-    return result
+        result.append(f"{d['strjudul']} {d['strringkasan']}")
+    return result[:10]
 
 
-# print(kompas("ekonomi"))
-# print(cnn_indo("ekonomi"))
+# print(cnn_indo("ekonomi") + kompas("ekonomi"))

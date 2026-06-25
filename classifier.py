@@ -35,9 +35,9 @@ def keyword(text):
     extractor = yake.KeywordExtractor(lan="id", max_ngram_size=3, top=3)
     key = extractor.extract_keywords(text)
     word = [kw[0] for kw in key]
-    word_text = " ".join(word)
-    word_text = re.sub(" ", "+", word_text)
-    return word_text
+    word_text = " ".join(word).split(" ")
+    word_text = set(word_text)
+    return "+".join(word_text)
 
 
 def embedding(text):
@@ -50,8 +50,11 @@ def embedding(text):
 
 
 def verify(text, news):
-    vec1 = embedding(text)
-    vec2 = [embedding(v) for v in news]
-    vec2_stack = torch.stack(vec2)
-    sim = F.cosine_similarity(vec1, vec2_stack, dim=1)
-    return sim.mean().item()
+    try:
+        vec1 = embedding(text)
+        vec2 = [embedding(v) if news else 0 for v in news]
+        vec2_stack = torch.stack(vec2)
+        sim = F.cosine_similarity(vec1, vec2_stack, dim=1)
+        return sim.mean().item()
+    except:
+        return 0

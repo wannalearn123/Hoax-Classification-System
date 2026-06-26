@@ -2,9 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def kompas(keyword):
+def kompas(query):
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    url = f"https://search.kompas.com/search?q={keyword}"
+    url = f"https://search.kompas.com/search?q={query}"
     r = requests.get(url, headers)
     soup = BeautifulSoup(r.text, "html.parser")
     articles = soup.find_all("div", class_="articleItem-box")
@@ -16,19 +16,16 @@ def kompas(keyword):
     return result[:10]
 
 
-def cnn_indo(keyword):
+def cnn_indo(query):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept-Language": "en-US,en;q=0.9",
         "Accept": "application/json",
     }
-    url = f"https://www.cnnindonesia.com/api/v3/search?query={keyword}"
+    url = f"https://www.cnnindonesia.com/api/v3/search?query={query}"
     r = requests.get(url, headers=headers)
     data = r.json()["data"]
     result = []
     for d in data:
         result.append(f"{d['strjudul']} {d['strringkasan']}")
     return result[:10]
-
-
-# print(cnn_indo("ekonomi") + kompas("ekonomi"))

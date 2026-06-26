@@ -39,9 +39,9 @@ def q_extractor(text):
     extractor = yake.KeywordExtractor(lan="id", max_ngram_size=3, top=3)
     key = extractor.extract_keywords(text)
     word = [kw[0] for kw in key]
-    # word_text = " ".join(word).split()
-    # word_text = set(word_text)
-    return "+".join(word)
+    word_text = " ".join(word).split()
+    word_text = set(word_text)
+    return "+".join(word_text)
 
 
 def embedding(text):

@@ -1,11 +1,10 @@
 import io
 
 import pytesseract
-from fastapi import Body, FastAPI, UploadFile
-from PIL import Image
-
 from classifier import classify, clean, q_extractor, verify
+from fastapi import Body, FastAPI, UploadFile
 from fetch import cnn_indo
+from PIL import Image
 
 app = FastAPI()
 
@@ -27,14 +26,16 @@ async def classify_hoax_pict(payload: UploadFile):
     content = await payload.read()
     img = Image.open(io.BytesIO(content))
     text = pytesseract.image_to_string(img)
-    text = clean(text)
-    pred = classify(text)[0]
+    result = classify(text)[0]
 
-    query = q_extractor(text)
+    query = q_extractor(clean(text))
     news = cnn_indo(query)
-    news = [clean(n) for n in news]
-    verif = verify(text, news)
-    return {"prediction": pred["label"], "score": pred["score"], "verification": verif}
+    verif = verify(query, news)
+    return {
+        "structure": result["label"],
+        "score": result["score"],
+        "verification": verif,
+    }
 
 
 @app.post("/extract_word")

@@ -3,7 +3,16 @@ import string
 
 import torch
 import torch.nn.functional as F
-from model_pipe import ModelClassifier
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+MODEL_DIR = "../../models"
+
+_MODEL = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
+_TOKENIZER = AutoTokenizer.from_pretrained(MODEL_DIR)
+_MODEL.eval()
+_SEED = 42
+torch.manual_seed(_SEED)
 
 
 def clean(text):
@@ -14,8 +23,13 @@ def clean(text):
 
 
 def classify(data):
-    pipe = ModelClassifier()
-    result = pipe.classifier(data)
+    classifier = pipeline(
+        "text-classification",
+        model=_MODEL,
+        tokenizer=_TOKENIZER,
+        device=DEVICE,
+    )
+    result = classifier(data, truncation=True)
     return result
 
 
@@ -25,24 +39,28 @@ def q_extractor(text):
     extractor = yake.KeywordExtractor(lan="id", max_ngram_size=3, top=3)
     key = extractor.extract_keywords(text)
     word = [kw[0] for kw in key]
-    word_text = " ".join(word).split()
-    word_text = set(word_text)
-    return "+".join(word_text)
+    # word_text = " ".join(word).split()
+    # word_text = set(word_text)
+    return "+".join(word)
 
 
 def embedding(text):
-    pipe = ModelClassifier()
-    inputs = pipe.tokenizer(text, return_tensors="pt", max_length=512)
+    cleaned = clean(text)
+    inputs = _TOKENIZER(
+        cleaned,
+        return_tensors="pt",
+        truncation=True,
+        padding="max_length",
+    ).to(DEVICE)
     with torch.no_grad():
-        outputs = pipe.model.bert(**inputs)
-        embeddings = outputs.last_hidden_state
-    vec_cls = embeddings[:, 0, :]
+        outputs = _MODEL.bert(**inputs)
+        vec_cls = outputs.last_hidden_state[:, 0, :]
     return F.normalize(vec_cls, p=2, dim=1)
 
 
 def verify(text, news):
     if not news:
-        return 0
+        return 0.00
     vec1 = embedding(text)
     vec2 = torch.stack([embedding(v) for v in news])
     sim = F.cosine_similarity(vec1, vec2, dim=1)

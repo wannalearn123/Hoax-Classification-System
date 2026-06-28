@@ -1,3 +1,4 @@
+import { Upload } from "lucide-react";
 import { useRef, type FormEvent } from "react";
 
 export function HoaxClassifier() {
@@ -58,10 +59,20 @@ export function HoaxClassifier() {
       </form>
       <form
         onSubmit={sendImage}
-        className="flex items-center gap-2 bg-[#1a1a1a] p-3 rounded-xl font-mono border-2 border-[#fbf0df] transition-colors duration-300 focus-within:border-[#f3d5a3] w-full"
+        className="flex items-center gap-2 bg-[#1a1a1a] p-3 rounded-xl font-mono border-2 border-[#fbf0df] transition-colors duration-300 focus-within:border-[#f3d5a3] w-full min-h-35"
         encType="multipart/form-data"
       >
-        <input type="file" name="image" />
+        {/*<input type="file" name="image" />*/}
+        <div className="text-center justify-center place-items-center w-full h-full rounded-xl border-2 p-2 relative cursor-pointer">
+          <Upload className="size-9 m-5" />
+          <h3>Click for Upload</h3>
+          <p>No more than 10 mb</p>
+          <input
+            type="file"
+            className="block h-full w-full absolute cursor-pointer top-5 opacity-0"
+            name="image"
+          />
+        </div>
         <button
           type="submit"
           className="flex item-center gap-2 bg-[#fbf0df] p-3 rounded-xl text-[#1a1a1a] font-mono "
@@ -73,7 +84,7 @@ export function HoaxClassifier() {
         ref={responseRef}
         readOnly
         placeholder="Response will appear here..."
-        className="w-full min-h-[140px] bg-[#1a1a1a] border-2 border-[#fbf0df] rounded-xl p-3 text-[#fbf0df] font-mono resize-y focus:border-[#f3d5a3] placeholder-[#fbf0df]/40"
+        className="w-full min-h-35 bg-[#1a1a1a] border-2 border-[#fbf0df] rounded-xl p-3 text-[#fbf0df] font-mono resize-y focus:border-[#f3d5a3] placeholder-[#fbf0df]/40"
       />
     </div>
   );

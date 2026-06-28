@@ -15,14 +15,14 @@ _SEED = 42
 torch.manual_seed(_SEED)
 
 
-def clean(text):
+def clean(text: str) -> str:
     text = text.translate(str.maketrans("", "", string.punctuation))
     text = re.sub(" +", " ", text)
     text = re.sub("[\xa0\n]", " ", text)
     return text.strip().lower()
 
 
-def classify(data):
+def classify(data: str):
     classifier = pipeline(
         "text-classification",
         model=_MODEL,
@@ -33,7 +33,7 @@ def classify(data):
     return result
 
 
-def q_extractor(text):
+def q_extractor(text: str):
     import yake
 
     extractor = yake.KeywordExtractor(lan="id", max_ngram_size=3, top=3)
@@ -64,4 +64,4 @@ def verify(text, news):
     vec1 = embedding(text)
     vec2 = torch.stack([embedding(v) for v in news])
     sim = F.cosine_similarity(vec1, vec2, dim=1)
-    return sim.mean().item()
+    return sim.max().item()

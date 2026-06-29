@@ -43,7 +43,7 @@ export function HoaxClassifier() {
     <div className="mt-8 mx-auto w-full max-w-2xl text-left flex flex-col gap-4">
       <form
         onSubmit={sendText}
-        className="flex items-center gap-2 bg-[#1a1a1a] p-3 rounded-xl font-mono border-2 border-[#fbf0df] transition-colors duration-300 focus-within:border-[#f3d5a3] w-full"
+        className="items-center gap-2 bg-[#1a1a1a] p-3 rounded-xl font-mono border-2 border-[#fbf0df] transition-colors duration-300 focus-within:border-[#f3d5a3] w-full"
       >
         <textarea
           name="title"
@@ -52,18 +52,17 @@ export function HoaxClassifier() {
         />
         <button
           type="submit"
-          className="flex item-center gap-2 bg-[#fbf0df] p-3 rounded-xl text-[#1a1a1a] font-mono "
+          className="flex text-center item-center gap-2 bg-[#fbf0df] p-3 rounded-xl text-[#1a1a1a] font-mono w-full"
         >
           Send
         </button>
       </form>
       <form
         onSubmit={sendImage}
-        className="flex items-center gap-2 bg-[#1a1a1a] p-3 rounded-xl font-mono border-2 border-[#fbf0df] transition-colors duration-300 focus-within:border-[#f3d5a3] w-full min-h-35"
+        className="items-center gap-y-2 bg-[#1a1a1a] p-3 rounded-xl font-mono border-2 border-[#fbf0df] transition-colors duration-300 focus-within:border-[#f3d5a3] w-full h-full "
         encType="multipart/form-data"
       >
-        {/*<input type="file" name="image" />*/}
-        <div className="text-center justify-center place-items-center w-full h-full rounded-xl border-2 p-2 relative cursor-pointer">
+        <div className="text-center justify-center place-items-center w-full rounded-xl border-2 p-2 relative cursor-pointer mb-2">
           <Upload className="size-9 m-5" />
           <h3>Click for Upload</h3>
           <p>No more than 10 mb</p>
@@ -75,7 +74,7 @@ export function HoaxClassifier() {
         </div>
         <button
           type="submit"
-          className="flex item-center gap-2 bg-[#fbf0df] p-3 rounded-xl text-[#1a1a1a] font-mono "
+          className="flex item-center gap-2 bg-[#fbf0df] p-3 rounded-xl text-[#1a1a1a] font-mono w-full mt-2"
         >
           Send
         </button>

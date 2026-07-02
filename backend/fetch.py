@@ -29,3 +29,5 @@ def cnn_indo(query):
     for d in data:
         result.append(f"{d['strjudul']} {d['strringkasan']}")
     return result[:10]
+
+# print(cnn_indo('ekonomi'))

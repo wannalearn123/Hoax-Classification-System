@@ -28,7 +28,9 @@ export function HoaxClassifier() {
       const form = e.currentTarget;
       const formData = new FormData(form);
       const file = formData.get("image") as File;
+      console.log(file);
       formData.append("file", file);
+      console.log(formData);
       const url = `${base_url}/predict_pict`;
       const res = await fetch(url, { method: "POST", body: formData });
 

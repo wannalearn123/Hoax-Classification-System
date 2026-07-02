@@ -27,20 +27,20 @@ def read_root():
 
 @app.post("/predict_word")
 async def classify_hoax(payload: str = Body(media_type="text/plain")):
-    classified = classify(payload)[0]
+    classified = classify(clean(payload))[0]
     query = q_extractor(clean(payload))
     news = cnn_indo(query)
-    verif = verify(query, news)
+    verif = "Yes" if verify(query, news) else "No" 
     score = classified["score"] * 100
 
     if classified["label"] == "LABEL 0":
-        result = "FACT"
+        result = "Fact"
     else:
-        result = "HOAX"
+        result = "Hoax"
 
     return {
         "structure": result,
-        "score": f"{score:.2f}%",
+        "score": int(score),
         "verification": verif,
     }
 
@@ -55,16 +55,17 @@ async def classify_hoax_pict(file: UploadFile):
 
     query = q_extractor(clean(text))
     news = cnn_indo(query)
-    verif = verify(query, news)
+    verif = "Yes" if verify(query, news) else "No" 
+    print(verif)   
 
     if classified["label"] == "LABEL_0":
-        result = "FACT"
+        result = "Fact"
     else:
-        result = "HOAX"
+        result = "Hoax"
 
     return {
         "structure": result,
-        "score": f"{score:.2f}%",
+        "score": int(score),
         "verification": verif,
     }
 

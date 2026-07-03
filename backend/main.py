@@ -9,7 +9,7 @@ from PIL import Image
 
 app = FastAPI()
 
-origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+origins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://10.12.42.72:3000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -56,7 +56,6 @@ async def classify_hoax_pict(file: UploadFile):
     query = q_extractor(clean(text))
     news = cnn_indo(query)
     verif = "Yes" if verify(query, news) else "No" 
-    print(verif)   
 
     if classified["label"] == "LABEL_0":
         result = "Fact"

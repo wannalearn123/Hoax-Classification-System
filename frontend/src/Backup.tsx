@@ -85,7 +85,10 @@ export function Backup() {
     setResult(null);
     setJsonRaw("");
 
-    const url = "http://127.0.0.1:8000"
+    // const url = "http://10.12.42.72:8000"
+    // const url = "http://127.0.0.1:8000"
+    const url = `http://${window.location.hostname}:8000`
+    console.log(url);
 
     const formData = new FormData();
 
@@ -99,7 +102,6 @@ export function Backup() {
     } else {
       // Gambar: hoax/fact
       formData.append("file", imageFile);
-      console.log(formData);
       const response = await fetch(`${url}/predict_pict`, { method: "POST", body: formData, });
       if (!response.ok) throw new Error(response.status);
 
@@ -191,7 +193,7 @@ export function Backup() {
                 {(textInput || imagePreview) && (
                   <button
                     onClick={handleReset}
-                    className="flex items-center gap-1.5 text-xs text-text-muted hover:text-danger transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-danger transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3 h-3" />
                     Reset
@@ -363,7 +365,7 @@ export function Backup() {
                       <h2 className="text-left text-lg font-bold tracking-tight">
                         {result.structure}
                       </h2>
-                      <p className="text-xs text-text-muted">
+                      <p className="text-xs text-text-secondary">
                         {isHoax ? "Informasi terindikasi tidak benar" : "Informasi terverifikasi benar"}
                       </p>
                     </div>
@@ -405,7 +407,7 @@ export function Backup() {
                           `}>
                             {result.score}%
                           </span>
-                          <span className="text-[10px] uppercase tracking-widest text-text-muted mt-0.5">
+                          <span className="text-[10px] uppercase font-bold tracking-widest text-text-secondary mt-0.5">
                             Confidence
                           </span>
                         </div>
@@ -416,7 +418,7 @@ export function Backup() {
                     <div className="grid grid-cols-2 gap-3">
                       {/* Structure */}
                       <div className="rounded-xl bg-surface-700/40 border border-border/30 p-4 space-y-1.5">
-                        <p className="text-[10px] uppercase tracking-widest text-text-muted">Structure</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Structure</p>
                         <p className={`
                           text-base font-bold
                           ${isHoax ? "text-danger" : "text-accent"}
@@ -426,7 +428,7 @@ export function Backup() {
                       </div>
                       {/* Verification */}
                       <div className="rounded-xl bg-surface-700/40 border border-border/30 p-4 space-y-1.5">
-                        <p className="text-[10px] uppercase tracking-widest text-text-muted">Verification</p>
+                        <p className="text-[10px] uppercase font-bold tracking-widest text-text-secondary">Verification</p>
                         <div className="flex text-center justify-center items-center gap-2">
                           <span className={`
                             inline-block w-2 h-2 rounded-full
@@ -442,7 +444,7 @@ export function Backup() {
                     {/* Score bar linear */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-text-muted">Tingkat Keyakinan</span>
+                        <span className="text-text-secondary">Tingkat Keyakinan</span>
                         <span className={isHoax ? "text-danger font-semibold" : "text-accent font-semibold"}>
                           {result.score}%
                         </span>
@@ -458,7 +460,7 @@ export function Backup() {
                           style={{ width: `${result.score}%` }}
                         />
                       </div>
-                      <div className="flex justify-between text-[10px] text-text-muted">
+                      <div className="flex justify-between text-[10px] text-text-secondary">
                         <span>Rendah</span>
                         <span>Sedang</span>
                         <span>Tinggi</span>

@@ -1,3 +1,4 @@
+import logo from "../hoax.png";
 import { useState, useCallback, useRef } from "react";
 import {
   Type,
@@ -88,7 +89,6 @@ export function Backup() {
     // const url = "http://10.12.42.72:8000"
     // const url = "http://127.0.0.1:8000"
     const url = `http://${window.location.hostname}:8000`
-    console.log(url);
 
     const formData = new FormData();
 
@@ -131,14 +131,14 @@ export function Backup() {
       <header className="relative z-10 border-b border-border/50 backdrop-blur-md bg-surface-900/60">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent-dim flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-surface-900" strokeWidth={2.5} />
+            <div className="relative w-15 h-15 rounded-xl  from-accent to-accent-dim flex items-center justify-center">
+	     <img src={logo} />
             </div>
             <div>
               <h1 className="text-lg font-bold tracking-tight text-left text-text-primary leading-none">
-                HoaxGuard
+                Hoax Guard
               </h1>
-              <p className="text-xs text-text-muted mt-0.5">Sistem Klasifikasi Hoax</p>
+              <p className="text-s text-text-secondary mt-0.5">Sistem Klasifikasi Hoax</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-text-muted">
@@ -292,7 +292,7 @@ export function Backup() {
                 w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-sm font-semibold transition-all duration-300 cursor-pointer
                 ${canSubmit
                   ? "bg-gradient-to-r from-accent to-accent-dim text-surface-900 hover:shadow-lg hover:shadow-accent/20 hover:-translate-y-0.5 active:translate-y-0"
-                  : "bg-surface-700/50 text-text-muted cursor-not-allowed"}
+                  : "bg-surface-700/50 text-text-secondary cursor-not-allowed"}
               `}
             >
               {loading ? (
@@ -497,10 +497,10 @@ export function Backup() {
                   <ShieldCheck className="w-8 h-8 text-text-muted/40" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-text-muted">
+                  <p className="text-sm font-medium text-text-secondary">
                     Belum ada hasil analisis
                   </p>
-                  <p className="text-xs text-text-muted/60 mt-1 max-w-[260px] mx-auto leading-relaxed">
+                  <p className="text-xs text-text-muted mt-1 max-w-[260px] mx-auto leading-relaxed">
                     Masukkan teks atau unggah gambar berita, lalu klik tombol
                     klasifikasi untuk melihat hasil.
                   </p>

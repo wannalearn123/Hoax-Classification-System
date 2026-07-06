@@ -1,0 +1,1 @@
+Sistem Klasifikasi Hoax berbasis Web Single Page Application menggunakan machine learning classification untuk analsisi struktur bahasa dan membandingkan dengan sumber terpercaya dengan cosine similarity

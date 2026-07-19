@@ -6,11 +6,9 @@ import torch.nn.functional as F
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-MODEL_DIR = "../../models"
 
-_MODEL = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
-_TOKENIZER = AutoTokenizer.from_pretrained(MODEL_DIR)
-_MODEL.eval()
+_MODEL = "wanna-learn123/Hoax-Classification"
+
 _SEED = 42
 torch.manual_seed(_SEED)
 
@@ -26,7 +24,7 @@ def classify(data: str):
     classifier = pipeline(
         "text-classification",
         model=_MODEL,
-        tokenizer=_TOKENIZER,
+        # tokenizer=_TOKENIZER,
         device=DEVICE,
     )
     result = classifier(data, truncation=True)

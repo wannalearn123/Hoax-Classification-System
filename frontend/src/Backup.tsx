@@ -77,42 +77,75 @@ export function Backup() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
 
-  // Klasifikasi
-  const handleClassify = useCallback(async () => {
-    const hasInput = mode === "text" ? textInput.trim().length > 0 : !!imageFile;
-    if (!hasInput) return;
+const handleClassify = useCallback(async () => {
+  const hasInput = mode === "text" ? textInput.trim().length > 0 : !!imageFile;
+  if (!hasInput) return;
 
-    setLoading(true);
-    setResult(null);
-    setJsonRaw("");
+  setLoading(true);
+  setResult(null);
+  setJsonRaw("");
 
-    // const url = "http://10.12.42.72:8000"
-    // const url = "http://127.0.0.1:8000"
-    const url = `http://${window.location.hostname}:8000`
-
-    const formData = new FormData();
+  try {
+    const url = `http://${window.location.hostname}:8000`;
+    let finalResult: ClassificationResult | { error?: string };
 
     if (mode === "text") {
-      const response = await fetch(`${url}/predict_word`, { method: "POST", body: textInput, });
-      const finalResult: ClassificationResult = await response.json();
+      const response = await fetch(`${url}/predict_word`, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: textInput,
+      });
 
-      setResult(finalResult);
-      setJsonRaw(JSON.stringify(finalResult, null, 2));
-      setLoading(false);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      finalResult = await response.json();
     } else {
-      // Gambar: hoax/fact
-      formData.append("file", imageFile);
-      const response = await fetch(`${url}/predict_pict`, { method: "POST", body: formData, });
-      if (!response.ok) throw new Error(response.status);
+      const formData = new FormData();
+      formData.append("file", imageFile!);
 
-      const finalResult: ClassificationResult = await response.json();
+      const response = await fetch(`${url}/predict_pict`, {
+        method: "POST",
+        body: formData,
+      });
 
-      setResult(finalResult);
-      setJsonRaw(JSON.stringify(finalResult, null, 2));
-      setLoading(false);
-  
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      finalResult = await response.json();
     }
-  }, [mode, textInput, imagePreview]);
+
+    // === Validasi Response ===
+    if (finalResult && typeof finalResult === 'object' && 'error' in finalResult) {
+      // Tampilkan error ke user
+      setResult(null);
+      setJsonRaw(JSON.stringify(finalResult, null, 2));
+      alert(`Error dari server: ${finalResult.error}`); // atau buat state error terpisah
+      return;
+    }
+
+    // Validasi apakah sesuai tipe yang diharapkan
+    if (!finalResult || !('structure' in finalResult) || !('score' in finalResult)) {
+      throw new Error("Format response dari server tidak sesuai");
+    }
+
+    setResult(finalResult as ClassificationResult);
+    setJsonRaw(JSON.stringify(finalResult, null, 2));
+
+  } catch (err: any) {
+    console.error(err);
+    const errorMsg = err.message || "Terjadi kesalahan saat menghubungi server";
+    setJsonRaw(`{"error": "${errorMsg}"}`);
+    
+    // Bisa tambah state error terpisah agar lebih clean
+    alert(errorMsg); 
+    // Atau setErrorState(errorMsg);
+  } finally {
+    setLoading(false);
+  }
+}, [mode, textInput, imageFile]);
 
   const isHoax = result?.structure === "Hoax";
   const hasInput = mode === "text" ? textInput.trim().length > 0 : !!imagePreview;
@@ -138,7 +171,7 @@ export function Backup() {
               <h1 className="text-lg font-bold tracking-tight text-left text-text-primary leading-none">
                 Hoax Guard
               </h1>
-              <p className="text-s text-text-secondary mt-0.5">Sistem Klasifikasi Hoax</p>
+              <p className="text-s text-text-secondary text-left mt-0.5">Sistem Klasifikasi Hoax</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-text-muted">
@@ -303,7 +336,7 @@ export function Backup() {
               ) : (
                 <>
                   <Search className="w-5 h-5" />
-                  Klasifikasi Sekarang
+                  Verifikasi Sekarang
                 </>
               )}
             </button>
@@ -478,7 +511,7 @@ export function Backup() {
                     </div>
                     <button
                       onClick={() => navigator.clipboard.writeText(jsonRaw)}
-                      className="text-xs text-text-muted hover:text-accent transition-colors cursor-pointer px-2 py-1 rounded-md hover:bg-accent/10"
+                      className="text-xs text-text-secondary hover:text-accent transition-colors cursor-pointer px-2 py-1 rounded-md hover:bg-accent/10"
                     >
                       Salin
                     </button>
@@ -514,7 +547,7 @@ export function Backup() {
       {/* ─── Footer ─── */}
       <footer className="relative z-10 border-t border-border/30 py-6 text-center">
         <p className="text-xs text-text-muted">
-          HoaxGuard v1.0 — Sistem Klasifikasi Hoax Berbasis Machine Learning
+          Hoax Guard v1.0 — Sistem Klasifikasi Hoax Berbasis Machine Learning
         </p>
       </footer>
     </div>

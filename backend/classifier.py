@@ -56,7 +56,8 @@ def embedding(text):
     with torch.no_grad():
         outputs = _MODEL.bert(**inputs)
         vec_cls = outputs.last_hidden_state[:, 0, :]
-    return F.normalize(vec_cls, p=2, dim=1)
+        vec_point = F.normalize(vec_cls, p=2, dim=1)
+    return vec_point
 
 
 def verify(text, news):

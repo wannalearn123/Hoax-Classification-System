@@ -39,18 +39,15 @@ async def classify_hoax(payload: str = Body(media_type="text/plain")):
     classified = classify(payload)[0]
     query = q_extractor(word)
     news = cnn_indo(query)
-    verif = "Yes" if validate(query, news) else "No"
+    cross_val = "Yes" if validate(query, news) else "No"
     score = classified["score"] * 100
 
-    if classified["label"] == "fakta":
-        result = "Fact"
-    else:
-        result = "Hoax"
+    result = classified["label"]
 
     return {
-        "structure": result,
+        "classification": result,
         "score": int(score),
-        "verification": verif,
+        "validation": cross_val,
     }
 
 
@@ -67,17 +64,14 @@ async def classify_hoax_pict(file: UploadFile):
 
         query = q_extractor(clean(text))
         news = cnn_indo(query)
-        verif = "Yes" if validate(query, news) > 0.7 else "No"
+        cross_val = "Yes" if validate(query, news) > 0.7 else "No"
 
-        if classified["label"] == "fakta":
-            result = "Fact"
-        else:
-            result = "Hoax"
+        result = classified['label']
 
         return {
             "structure": result,
             "score": int(score),
-            "verification": verif,
+            "verification": cross_val,
         }
     except:
         return {"error": "wrong data type"}

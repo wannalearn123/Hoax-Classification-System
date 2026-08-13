@@ -10,7 +10,7 @@ MODEL_DIR = "../../models"
 
 # _MODEL = AutoModelForSequenceClassification.from_pretrained( "wanna-learn123/Hoax-Classification")
 MODEL = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
-# _TOKENIZER = AutoTokenizer.from_pretrained( "wanna-learn123/Hoax-Classification")
+# e file claimed /predict_word matches "LABEL 0" (space) and /predict_pict matches "LABEL_0" (underscore). Bu_TOKENIZER = AutoTokenizer.from_pretrained( "wanna-learn123/Hoax-Classification")
 TOKENIZER = AutoTokenizer.from_pretrained(MODEL_DIR)
 
 _SEED = 42
@@ -32,7 +32,7 @@ def classify(data: str):
         tokenizer=TOKENIZER,
         device=DEVICE,
     )
-    result = classifier(data, truncation=True, max_length=480)
+    result = classifier(data, truncation=True)
     return result
 
 

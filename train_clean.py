@@ -26,6 +26,7 @@ from transformers import (
     Trainer,
     TrainingArguments,
     pipeline,
+    EarlyStoppingCallback,
 )
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -129,7 +130,7 @@ def compute_metrics(eval_pred):
 OUT_DIR = "Hoax-2class"
 args = TrainingArguments(
     output_dir=OUT_DIR,
-    num_train_epochs=5,
+    num_train_epochs=3,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
     learning_rate=2e-5,
@@ -139,6 +140,7 @@ args = TrainingArguments(
     metric_for_best_model="f1",
     greater_is_better=True,
     weight_decay=0.01,
+    label_smoothing_factor=0.1,
     logging_steps=100,
     fp16=torch.cuda.is_available(),
     report_to="none",
@@ -152,6 +154,7 @@ trainer = Trainer(
     eval_dataset=ds_full["val"],
     processing_class=tokenizer,
     compute_metrics=compute_metrics,
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
 )
 
 print("=== Baseline (pre-training) ===")

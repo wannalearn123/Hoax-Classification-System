@@ -1,5 +1,4 @@
 import { HoaxClassifier } from "./HoaxClassifier";
-import { Backup } from "./Backup";
 import "./index.css";
 
 import logo from "./logo.svg";
@@ -31,8 +30,7 @@ export function App() {
         and save to test HMR*/}
       {/*</p>*/}
       {/*<APITester />*/}
-      <Backup />
-      {/*<HoaxClassifier />*/}
+      <HoaxClassifier />
     </div>
   );
 }

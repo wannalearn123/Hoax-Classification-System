@@ -8,6 +8,7 @@ Fixes vs train.ipynb:
 - report_to="none", fp16 when GPU present
 - saves model + tokenizer into a self-contained dir you drop into Hoaks_Cls/models
 """
+import kagglehub
 import os
 import re
 import glob
@@ -34,10 +35,11 @@ print("Device:", DEVICE, "| CUDA:", torch.cuda.is_available())
 os.environ["WANDB_DISABLED"] = "true"
 
 # ---------------------------------------------------------------- data paths
-import kagglehub
 
-fact_path = kagglehub.dataset_download("linkgish/indonesian-fact-and-hoax-political-news")
-hoax_path = kagglehub.dataset_download("ireddragonicy/indonesian-hoax-news-dataset")
+fact_path = kagglehub.dataset_download(
+    "linkgish/indonesian-fact-and-hoax-political-news")
+hoax_path = kagglehub.dataset_download(
+    "ireddragonicy/indonesian-hoax-news-dataset")
 
 CNN = f"{fact_path}/Summarized/dataset_cnn_summarized.xlsx"
 KOMPAS = f"{fact_path}/Summarized/dataset_kompas_summarized.xlsx"
@@ -54,29 +56,36 @@ df_hoax = pd.read_csv(ALT_HOAX).rename(columns={"body_text": "cleaned"})
 
 # recover missing 'cleaned' from 'raw narasi' BEFORE dropna (validated: 3879/3879 rows recoverable)
 if "raw narasi" in df_turnbackhoax.columns:
-    df_turnbackhoax["cleaned"] = df_turnbackhoax["cleaned"].fillna(df_turnbackhoax["raw narasi"])
+    df_turnbackhoax["cleaned"] = df_turnbackhoax["cleaned"].fillna(
+        df_turnbackhoax["raw narasi"])
 
 for df in [df_cnn, df_kompas, df_tempo, df_turnbackhoax, df_hoax]:
     df.dropna(subset=["cleaned"], inplace=True)
     df["cleaned"] = df["cleaned"].astype(str)
 
 # ---------------------------------------------------------------- preprocessing
+
+
 def pad_punct(text):
     text = re.sub(f"([{re.escape(string.punctuation)}])", r" \1 ", text)
     text = re.sub(r"[\xa0\n\t]", " ", text)
     text = re.sub(r" +", " ", text).strip()
     return text
 
+
 def clean_prefix(text):
     return text.replace("Penjelasan : ", "")
+
 
 for df in [df_cnn, df_kompas, df_tempo, df_turnbackhoax, df_hoax]:
     df["cleaned"] = df["cleaned"].apply(pad_punct)
 df_hoax["cleaned"] = df_hoax["cleaned"].apply(clean_prefix)
 
 # ---------------------------------------------------------------- labels (binary)
-fact_cols = [df[["cleaned", "label"]].copy() for df in [df_cnn, df_kompas, df_tempo]]
-tb = df_turnbackhoax[["cleaned", "label"]].copy()          # label col == 1 (hoax)
+fact_cols = [df[["cleaned", "label"]].copy()
+             for df in [df_cnn, df_kompas, df_tempo]]
+tb = df_turnbackhoax[["cleaned", "label"]
+                     ].copy()          # label col == 1 (hoax)
 ho = df_hoax[["cleaned"]].copy()
 ho["label"] = 1
 
@@ -87,24 +96,30 @@ print("Label distribution:\n", df_all["label"].value_counts())
 
 # ---------------------------------------------------------------- dataset
 raw_ds = Dataset.from_pandas(df_all)
-raw_ds = raw_ds.cast_column("label", ClassLabel(num_classes=2, names=["fakta", "hoax"]))
+raw_ds = raw_ds.cast_column("label", ClassLabel(
+    num_classes=2, names=["Fact", "Hoax"]))
 
-tt = raw_ds.train_test_split(test_size=0.2, seed=42, stratify_by_column="label")
-vv = tt["test"].train_test_split(test_size=0.5, seed=42, stratify_by_column="label")
-ds_raw = DatasetDict({"train": tt["train"], "val": vv["train"], "test": vv["test"]})
+tt = raw_ds.train_test_split(
+    test_size=0.2, seed=42, stratify_by_column="label")
+vv = tt["test"].train_test_split(
+    test_size=0.5, seed=42, stratify_by_column="label")
+ds_raw = DatasetDict(
+    {"train": tt["train"], "val": vv["train"], "test": vv["test"]})
 print(ds_raw)
 
 # ---------------------------------------------------------------- tokenize
 tokenizer = AutoTokenizer.from_pretrained("indobenchmark/indobert-base-p2")
 
+
 def tokenize_ds(data):
     return tokenizer(data["cleaned"], padding=True, truncation=True, max_length=256)
+
 
 ds_full = ds_raw.map(tokenize_ds, batched=True).remove_columns(["cleaned"])
 
 # ---------------------------------------------------------------- model (2-class)
-id2label = {0: "fakta", 1: "hoax"}
-label2id = {"fakta": 0, "hoax": 1}
+id2label = {0: "Fact", 1: "Hoax"}
+label2id = {"Fact": 0, "Hoax": 1}
 config = AutoConfig.from_pretrained(
     "indobenchmark/indobert-base-p2",
     num_labels=2,
@@ -119,12 +134,15 @@ model = AutoModelForSequenceClassification.from_pretrained(
 metric_acc = evaluate.load("accuracy")
 metric_others = evaluate.combine(["f1", "precision", "recall"])
 
+
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     preds = np.argmax(logits, axis=-1)
     acc = metric_acc.compute(predictions=preds, references=labels)
-    others = metric_others.compute(predictions=preds, references=labels, average="macro")
+    others = metric_others.compute(
+        predictions=preds, references=labels, average="macro")
     return {**acc, **others}
+
 
 # ---------------------------------------------------------------- train
 OUT_DIR = "Hoax-2class"
@@ -167,14 +185,16 @@ print("=== Test set ===")
 print(trainer.evaluate(ds_full["test"]))
 
 # ---------------------------------------------------------------- save
-trainer.save_model(OUT_DIR)          # saves config.json with num_labels=2 + id2label
+# saves config.json with num_labels=2 + id2label
+trainer.save_model(OUT_DIR)
 tokenizer.save_pretrained(OUT_DIR)
 # keep only the best checkpoint, drop partial epoch dirs
 for ckpt in glob.glob(f"{OUT_DIR}/checkpoint-*"):
     shutil.rmtree(ckpt, ignore_errors=True)
 
 # ---------------------------------------------------------------- verify
-clf = pipeline("text-classification", model=OUT_DIR, tokenizer=OUT_DIR, device=DEVICE)
+clf = pipeline("text-classification", model=OUT_DIR,
+               tokenizer=OUT_DIR, device=DEVICE)
 samples = [
     "jakarta adalah ibu kota indonesia",
     "hari ini cuaca cerah di jakarta",

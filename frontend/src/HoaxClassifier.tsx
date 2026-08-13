@@ -1,92 +1,181 @@
-import { Upload } from "lucide-react";
-import { useRef, type FormEvent } from "react";
+import { useCallback, useState } from "react";
+import type { ClassificationResult, InputMode } from "./types";
+import { InputPanel } from "./components/InputPanel";
+import { OutputPanel } from "./components/OutputPanel";
+import logo from "../hoax.png";
 
 export function HoaxClassifier() {
-  const base_url = "http://127.0.0.1:8000";
-  const responseRef = useRef<HTMLFormElement>(null);
-  const sendText = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const [mode, setMode] = useState<InputMode>("text");
+  const [textInput, setTextInput] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [result, setResult] = useState<ClassificationResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [jsonRaw, setJsonRaw] = useState<string>("");
+
+  /** Mengganti mode input sekaligus mengosongkan seluruh state yang berkaitan. */
+  const handleModeSwitch = useCallback((newMode: InputMode) => {
+    if (newMode === mode) return;
+    setMode(newMode);
+    setResult(null);
+    setJsonRaw("");
+    setImagePreview(null);
+    setImageFile(null);
+    setTextInput("");
+  }, [mode]);
+
+  /** Memperbarui teks input dan mengosongkan hasil sebelumnya. */
+  const handleTextChange = useCallback((text: string) => {
+    setTextInput(text);
+    setResult(null);
+    setJsonRaw("");
+  }, []);
+
+  /** Mengextract file yang diunggah lalu membuat pratinjau gambar. */
+  const handleImageUpload = useCallback((file: File) => {
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+    setResult(null);
+    setJsonRaw("");
+  }, []);
+
+  /** Menghapus gambar yang telah diunggah dari state. */
+  const handleImageClear = useCallback(() => {
+    setImagePreview(null);
+    setImageFile(null);
+    setResult(null);
+    setJsonRaw("");
+  }, []);
+
+  /** Mereset seluruh input dan hasil analisis. */
+  const handleReset = useCallback(() => {
+    setTextInput("");
+    setImagePreview(null);
+    setImageFile(null);
+    setResult(null);
+    setJsonRaw("");
+    setLoading(false);
+  }, []);
+
+  /** Mengirim teks/gambar ke backend dan memvalidasi respons yang diterima. */
+  const handleClassify = useCallback(async () => {
+    const hasInput = mode === "text" ? textInput.trim().length > 0 : !!imageFile;
+    if (!hasInput) return;
+
+    setLoading(true);
+    setResult(null);
+    setJsonRaw("");
 
     try {
-      const form = e.currentTarget;
-      const formData = new FormData(form);
-      const text = formData.get("title") as string;
-      const url = `${base_url}/predict_word`;
-      const res = await fetch(url, { method: "POST", body: text });
+      const url = `http://${window.location.hostname}:8000`;
+      let finalResult: ClassificationResult | { error?: string };
 
-      const data = await res.json();
-      responseRef.current!.value = JSON.stringify(data, null, 2);
-    } catch (error) {
-      responseRef.current!.value = String(error);
+      if (mode === "text") {
+        const response = await fetch(`${url}/predict_word`, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: textInput,
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        finalResult = await response.json();
+      } else {
+        const formData = new FormData();
+        formData.append("file", imageFile!);
+        const response = await fetch(`${url}/predict_pict`, {
+          method: "POST",
+          body: formData,
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        finalResult = await response.json();
+      }
+
+      // Validasi hasil respons dari server
+      if (finalResult && typeof finalResult === "object" && "error" in finalResult) {
+        setResult(null);
+        setJsonRaw(JSON.stringify(finalResult, null, 2));
+        alert(`Error dari server: ${finalResult.error}`);
+        return;
+      }
+
+      // Validasi apakah format respons sesuai yang diharapkan
+      if (!finalResult || !("classification" in finalResult) || !("score" in finalResult)) {
+        throw new Error("Format response dari server tidak sesuai");
+      }
+
+      setResult(finalResult as ClassificationResult);
+      setJsonRaw(JSON.stringify(finalResult, null, 2));
+    } catch (err: unknown) {
+      console.error(err);
+      const errorMsg = err instanceof Error ? err.message : "Terjadi kesalahan saat menghubungi server";
+      setJsonRaw(`{"error": "${errorMsg}"}`);
+      alert(errorMsg);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [mode, textInput, imageFile]);
 
-  const sendImage = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    try {
-      const form = e.currentTarget;
-      const formData = new FormData(form);
-      const file = formData.get("image") as File;
-      console.log(file);
-      formData.append("file", file);
-      console.log(formData);
-      const url = `${base_url}/predict_pict`;
-      const res = await fetch(url, { method: "POST", body: formData });
-
-      const data = await res.json();
-      responseRef.current!.value = JSON.stringify(data, null, 2);
-    } catch (error) {
-      responseRef.current!.value = String(error);
-    }
-  };
+  const hasInput = mode === "text" ? textInput.trim().length > 0 : !!imagePreview;
+  const canSubmit = hasInput && !loading;
 
   return (
-    <div className="mt-8 mx-auto w-full max-w-2xl text-left flex flex-col gap-4">
-      <form
-        onSubmit={sendText}
-        className="items-center gap-2 bg-[#1a1a1a] p-3 rounded-xl font-mono border-2 border-[#fbf0df] transition-colors duration-300 focus-within:border-[#f3d5a3] w-full"
-      >
-        <textarea
-          name="title"
-          className="w-full flex-1 bg-transparent border-0 text-[#fbf0df] font-mono text-base py-1.5 px-2 outline-none focus:text-white placeholder-[#fbf0df]/40"
-          placeholder="input text"
-        />
-        <button
-          type="submit"
-          className="flex text-center item-center gap-2 bg-[#fbf0df] p-3 rounded-xl text-[#1a1a1a] font-mono w-full"
-        >
-          Send
-        </button>
-      </form>
-      <form
-        onSubmit={sendImage}
-        className="items-center gap-y-2 bg-[#1a1a1a] p-3 rounded-xl font-mono border-2 border-[#fbf0df] transition-colors duration-300 focus-within:border-[#f3d5a3] w-full h-full "
-        encType="multipart/form-data"
-      >
-        <div className="text-center justify-center place-items-center w-full rounded-xl border-2 p-2 relative cursor-pointer mb-2">
-          <Upload className="size-9 m-5" />
-          <h3>Click for Upload</h3>
-          <p>No more than 10 mb</p>
-          <input
-            type="file"
-            className="block h-full w-full absolute cursor-pointer top-5 opacity-0"
-            name="image"
-          />
+    <div className="noise-bg min-h-screen relative flex flex-col">
+      {/* Dekorasi latar belakang */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-accent/5 blur-[120px]" />
+        <div className="absolute -bottom-60 -left-40 w-[600px] h-[600px] rounded-full bg-danger/5 blur-[140px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-accent/[0.02] blur-[100px]" />
+      </div>
+
+      {/* Header */}
+      <header className="relative z-10 border-b border-border/50 backdrop-blur-md bg-surface-900/60">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative w-15 h-15 rounded-xl from-accent to-accent-dim flex items-center justify-center">
+              <img src={logo} />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight text-left text-text-primary leading-none">
+                Hoax Guard
+              </h1>
+              <p className="text-s text-text-secondary text-left mt-0.5">Sistem Klasifikasi Hoax</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-text-muted">
+            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+            Model Aktif
+          </div>
         </div>
-        <button
-          type="submit"
-          className="flex item-center gap-2 bg-[#fbf0df] p-3 rounded-xl text-[#1a1a1a] font-mono w-full mt-2"
-        >
-          Send
-        </button>
-      </form>
-      <textarea
-        ref={responseRef}
-        readOnly
-        placeholder="Response will appear here..."
-        className="w-full min-h-35 bg-[#1a1a1a] border-2 border-[#fbf0df] rounded-xl p-3 text-[#fbf0df] font-mono resize-y focus:border-[#f3d5a3] placeholder-[#fbf0df]/40"
-      />
+      </header>
+
+      {/* Konten utama */}
+      <main className="relative z-10 flex-1 max-w-6xl mx-auto w-full px-6 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <InputPanel
+            mode={mode}
+            onModeChange={handleModeSwitch}
+            textInput={textInput}
+            onTextChange={handleTextChange}
+            imageFile={imageFile}
+            imagePreview={imagePreview}
+            onImageUpload={handleImageUpload}
+            onImageClear={handleImageClear}
+            onReset={handleReset}
+            onClassify={handleClassify}
+            canSubmit={canSubmit}
+            loading={loading}
+          />
+          <OutputPanel loading={loading} result={result} jsonRaw={jsonRaw} />
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-border/30 py-6 text-center">
+        <p className="text-xs text-text-muted">
+          Hoax Guard v1.0 — Sistem Klasifikasi Hoax Berbasis Machine Learning
+        </p>
+      </footer>
     </div>
   );
 }

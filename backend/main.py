@@ -1,6 +1,5 @@
 import io
 import socket
-import string
 import pytesseract
 from classifier import classify, clean, q_extractor, validate
 from fastapi import Body, FastAPI, UploadFile
@@ -36,7 +35,7 @@ def read_root():
 @app.post("/predict_word")
 async def classify_hoax(payload: str = Body(media_type="text/plain")):
     word = clean(payload)
-    classified = classify(payload)[0]
+    classified = classify(word)[0]
     query = q_extractor(word)
     news = cnn_indo(query)
     cross_val = "Yes" if validate(query, news) else "No"
@@ -69,9 +68,9 @@ async def classify_hoax_pict(file: UploadFile):
         result = classified['label']
 
         return {
-            "structure": result,
+            "classification": result,
             "score": int(score),
-            "verification": cross_val,
+            "validation": cross_val,
         }
     except:
         return {"error": "wrong data type"}

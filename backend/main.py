@@ -2,7 +2,7 @@ import io
 import socket
 import string
 import pytesseract
-from classifier import classify, clean, q_extractor, verify
+from classifier import classify, clean, q_extractor, validate
 from fastapi import Body, FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fetch import cnn_indo
@@ -36,13 +36,13 @@ def read_root():
 @app.post("/predict_word")
 async def classify_hoax(payload: str = Body(media_type="text/plain")):
     word = clean(payload)
-    classified = classify(word)[0]
+    classified = classify(payload)[0]
     query = q_extractor(word)
     news = cnn_indo(query)
-    verif = "Yes" if verify(query, news) else "No"
+    verif = "Yes" if validate(query, news) else "No"
     score = classified["score"] * 100
 
-    if classified["label"] == "LABEL 0":
+    if classified["label"] == "fakta":
         result = "Fact"
     else:
         result = "Hoax"
@@ -61,15 +61,15 @@ async def classify_hoax_pict(file: UploadFile):
         img = Image.open(io.BytesIO(content))
         text = pytesseract.image_to_string(img)
         if not text:
-            return {"error": "picture is not relevant"}
+            return {"error": "no text detected"}
         classified = classify(text)[0]
         score = classified["score"] * 100
 
         query = q_extractor(clean(text))
         news = cnn_indo(query)
-        verif = "Yes" if verify(query, news) > 0.7 else "No"
+        verif = "Yes" if validate(query, news) > 0.7 else "No"
 
-        if classified["label"] == "LABEL_0":
+        if classified["label"] == "fakta":
             result = "Fact"
         else:
             result = "Hoax"

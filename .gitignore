@@ -62,3 +62,5 @@ config.local.yaml
 # Jika Anda menggunakan database SQLite
 *.sqlite3
 *.db
+
+AGENT.md

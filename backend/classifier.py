@@ -32,7 +32,7 @@ def classify(data: str):
         tokenizer=TOKENIZER,
         device=DEVICE,
     )
-    result = classifier(data, truncation=True)
+    result = classifier(data, truncation=True, max_length=480)
     return result
 
 
@@ -62,7 +62,7 @@ def embedding(text):
     return vec_point
 
 
-def verify(text, news):
+def validate(text, news):
     if not news:
         return 0.00
     vec1 = embedding(text)

@@ -1,12 +1,13 @@
 import io
 import socket
 import pytesseract
+from PIL import Image
+
 from classifier import classify, clean, q_extractor, validate
 from fastapi import Body, FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fetch import cnn_indo
-import logger
-from PIL import Image
+# import logger
 
 # logger
 
@@ -31,7 +32,7 @@ app.add_middleware(
 def read_root():
     return {"title": "Classifying Hoax through Text & Image"}
 
-
+# verification through text
 @app.post("/predict_word")
 async def classify_hoax(payload: str = Body(media_type="text/plain")):
     word = clean(payload)
@@ -50,6 +51,7 @@ async def classify_hoax(payload: str = Body(media_type="text/plain")):
     }
 
 
+# verification through picture
 @app.post("/predict_pict")
 async def classify_hoax_pict(file: UploadFile):
     try:

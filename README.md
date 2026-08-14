@@ -59,7 +59,7 @@ Use `fastapi dev` for auto-reload during development. The backend runs on `http:
 
 Model dapat diperoleh dari dua cara:
 
-1. **Unduh dari HuggingFace** — https://huggingface.co/wanna-learn123/Hoax-Classification (repo kamu / your repo), lalu tempatkan isinya di folder model yang dimuat `classifier.py`:
+1. **Unduh dari HuggingFace** — https://huggingface.co/wanna-learn123/Hoax-Classification, lalu tempatkan isinya di folder model yang dimuat `classifier.py`:
    ```bash
    cd backend
    # download & extract the repo into ../../models

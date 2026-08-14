@@ -39,12 +39,32 @@ def classify(data: str):
 def q_extractor(text: str):
     import yake
 
-    extractor = yake.KeywordExtractor(lan="id", max_ngram_size=2, top=1)
+    # Words that add no discriminative power to a news search query.
+    generic = {
+        "baru", "mulai", "melayani", "akan", "untuk", "dari", "yang",
+        "dengan", "dalam", "pada", "ini", "itu", "sudah", "juga", "tidak",
+        "pemerintah", "menjadi", "adanya", "tersebut", "kembali",
+        "besar", "ibu", "kota", "sangat", "karena", "setelah",
+    }
+
+    extractor = yake.KeywordExtractor(lan="id", max_ngram_size=2, top=8)
     key = extractor.extract_keywords(text)
-    word = [kw[0] for kw in key]
-    word_text = " ".join(word).split()
-    word_text = set(word_text)
-    return "+".join(word_text)
+
+    # keep the highest-scored phrase and skip any that shares a token with one already kept.
+    kept = []
+    used = set()
+    for kw, _score in key:
+        toks = kw.split()
+        if set(toks) & used:
+            continue
+        if all(t in generic for t in toks):
+            continue
+        used |= set(toks)
+        kept.append(kw)
+        if len(used) >= 6:
+            break
+
+    return "+".join(kept)
 
 
 def embedding(text):

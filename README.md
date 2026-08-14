@@ -28,16 +28,16 @@ src/
 ├── train_clean.py    # fine-tuning script (Kaggle/Colab)
 ```
 
-> Model weights berada di **luar** repo, di `Hoaks_Cls/models` (di-load oleh `backend/classifier.py` via `../../models`).
+> Model weights berada di **luar** repo (di-load oleh `backend/classifier.py` via `../../models`).
 
 ---
 
 ## Prasyarat / Prerequisites
 
-- **Python 3** virtualenv: gunakan `linux_venv/` yang sudah ada (atau buat baru).
+- **Python 3** + `fastapi` (install via `pip`, gunakan virtualenv kamu sendiri).
 - **Tesseract** terpasang di sistem (wajib untuk OCR gambar pada `/predict_pict`).
-- **Bun** untuk frontend.
-- **Model weights** di `Hoaks_Cls/models` — tanpa ini backend akan crash saat import.
+- **JS package manager** — `bun`, `npm`, atau lainnya (untuk frontend).
+- **Model weights** di folder model (di luar repo) — tanpa ini backend akan crash saat import.
 
 ---
 
@@ -45,23 +45,23 @@ src/
 
 ```bash
 cd backend
-../linux_venv/bin/uvicorn main:app --reload
+fastapi run            # atau: fastapi dev  (auto-reload)
 ```
 
 - Server berjalan di `http://127.0.0.1:8000`.
-- Model dimuat saat import dari `../../models` (yaitu `Hoaks_Cls/models`).
+- Model dimuat saat import dari `../../models` (relatif terhadap `backend/`, berada di luar repo).
 - `/predict_word` memanggil API live CNN Indonesia, jadi **butuh koneksi internet**.
 
-The backend runs on `http://127.0.0.1:8000`. The model loads at import time from `../../models` (i.e. `Hoaks_Cls/models`). News validation hits CNN Indonesia's live API, so an internet connection is required.
+Use `fastapi dev` for auto-reload during development. The backend runs on `http://127.0.0.1:8000`. The model loads at import time from `../../models` (relative to `backend/`, outside the repo). News validation hits CNN Indonesia's live API, so an internet connection is required.
 
 ### Model Weights
 
 Model dapat diperoleh dari dua cara:
 
-1. **Unduh dari HuggingFace** (repo kamu / your repo) `wanna-learn123/Hoax-Classification`, lalu tempatkan isinya di `Hoaks_Cls/models`:
+1. **Unduh dari HuggingFace** (repo kamu / your repo) `wanna-learn123/Hoax-Classification`, lalu tempatkan isinya di folder model yang dimuat `classifier.py`:
    ```bash
-   cd Hoaks_Cls
-   # download & extract the repo into models/
+   cd backend
+   # download & extract the repo into ../../models
    ```
 2. **Fine-tune sendiri** dengan `train_clean.py` (lihat bagian Training).
 
@@ -73,8 +73,8 @@ Dua opsi ini setara — `classifier.py` memuat dari `../../models` dan tokenizer
 
 ```bash
 cd frontend
-bun install
-bun run dev        # bun --hot src/index.ts
+bun install        # atau: npm install  /  yarn / pnpm
+bun run dev        # npm run dev (jalankan skrip "dev")
 ```
 
 - SPA tersedia di `http://localhost:3000`.
@@ -83,7 +83,7 @@ bun run dev        # bun --hot src/index.ts
 Build produksi:
 
 ```bash
-bun run build      # bun run build.ts
+bun run build      # atau: npm run build
 ```
 
 ---
@@ -125,10 +125,10 @@ Skrip `train_clean.py` melatih model 2-kelas (Fact/Hoax) berbasis `indobenchmark
 !python train_clean.py
 ```
 
-Data diambil via `kagglehub` (dataset fakta & hoax Indonesia). Hasil disimpan ke `Hoax-2class.zip`, lalu pindahkan ke `Hoaks_Cls/models`:
+Data diambil via `kagglehub` (dataset fakta & hoax Indonesia). Hasil disimpan ke `Hoax-2class.zip`, lalu unzip dan tempatkan ke folder model yang dimuat backend (`../../models` relatif dari `backend/`):
 
 ```bash
-unzip Hoax-2class.zip -d ../../models
+unzip Hoax-2class.zip -d <folder-model>
 ```
 
 ---
@@ -147,5 +147,5 @@ unzip Hoax-2class.zip -d ../../models
 
 - `tesseract` wajib terpasang untuk `/predict_pict` (OCR).
 - Backend **crash** jika `Hoaks_Cls/models` tidak ada — model dimuat saat import.
-- Model mengeluarkan label **`Fact`** / **`Hoax`**; `/predict_word` & `/predict_pict` hanya melaporkan **Fact** bila `label == "fakta"`. Pastikan label model sesuai, jika tidak semua laporan menjadi **Hoax**.
+- Label model **`Fact`** / **`Hoax`** (lihat `train_clean.py`) diteruskan langsung ke respons, tanpa pemeriksaan label tambahan.
 - CORS backend hanya mengizinkan `localhost:3000`, `127.0.0.1:3000`, dan IP LAN.

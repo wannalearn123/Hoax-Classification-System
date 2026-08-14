@@ -26,7 +26,6 @@ src/
 ├── frontend/         # Bun + React SPA
 │   └── src/          # index.ts (server), frontend.tsx, App.tsx, HoaxClassifier.tsx
 ├── train_clean.py    # fine-tuning script (Kaggle/Colab)
-└── linux_venv/       # Python virtual environment (backend)
 ```
 
 > Model weights berada di **luar** repo, di `Hoaks_Cls/models` (di-load oleh `backend/classifier.py` via `../../models`).

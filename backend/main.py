@@ -33,6 +33,8 @@ def read_root():
     return {"title": "Classifying Hoax through Text & Image"}
 
 # verification through text
+
+
 @app.post("/predict_word")
 async def classify_hoax(payload: str = Body(media_type="text/plain")):
     word = clean(payload)
@@ -41,7 +43,6 @@ async def classify_hoax(payload: str = Body(media_type="text/plain")):
     news = cnn_indo(query)
     cross_val = "Yes" if validate(query, news) else "No"
     score = classified["score"] * 100
-
     result = classified["label"]
 
     return {
@@ -66,7 +67,6 @@ async def classify_hoax_pict(file: UploadFile):
         query = q_extractor(clean(text))
         news = cnn_indo(query)
         cross_val = "Yes" if validate(query, news) > 0.7 else "No"
-
         result = classified['label']
 
         return {

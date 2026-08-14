@@ -35,7 +35,8 @@ src/
 ## Prasyarat / Prerequisites
 
 - **Python 3** + `fastapi` (install via `pip`, gunakan virtualenv kamu sendiri).
-- **Tesseract** terpasang di sistem (wajib untuk OCR gambar pada `/predict_pict`).
+- **Tesseract** terpasang di sistem (wajib untuk OCR gambar pada `/predict_pict`) — unduh di 
+https://github.com/tesseract-ocr/tesseract
 - **JS package manager** — `bun`, `npm`, atau lainnya (untuk frontend).
 - **Model weights** di folder model (di luar repo) — tanpa ini backend akan crash saat import.
 
@@ -58,7 +59,7 @@ Use `fastapi dev` for auto-reload during development. The backend runs on `http:
 
 Model dapat diperoleh dari dua cara:
 
-1. **Unduh dari HuggingFace** (repo kamu / your repo) `wanna-learn123/Hoax-Classification`, lalu tempatkan isinya di folder model yang dimuat `classifier.py`:
+1. **Unduh dari HuggingFace** — https://huggingface.co/wanna-learn123/Hoax-Classification (repo kamu / your repo), lalu tempatkan isinya di folder model yang dimuat `classifier.py`:
    ```bash
    cd backend
    # download & extract the repo into ../../models

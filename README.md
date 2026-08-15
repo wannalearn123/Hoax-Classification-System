@@ -78,8 +78,8 @@ bun install        # atau: npm install  /  yarn / pnpm
 bun run dev        # npm run dev (jalankan skrip "dev")
 ```
 
-- SPA tersedia di `http://localhost:3000`.
-- Frontend memanggil backend hardcoded di `http://127.0.0.1:8000`.
+- SPA dapat diakses melalui port 3000 (mis. `http://localhost:3000` atau IP LAN).
+- Frontend memanggil backend di `http://<hostname>:8000` (hostname halaman yang sama, lihat `HoaxClassifier.tsx:74`).
 
 Build produksi:
 
@@ -149,4 +149,4 @@ unzip Hoax-2class.zip -d <folder-model>
 - `tesseract` wajib terpasang untuk `/predict_pict` (OCR).
 - Backend **crash** jika `Hoaks_Cls/models` tidak ada — model dimuat saat import.
 - Label model **`Fact`** / **`Hoax`** (lihat `train_clean.py`) diteruskan langsung ke respons, tanpa pemeriksaan label tambahan.
-- CORS backend hanya mengizinkan `localhost:3000`, `127.0.0.1:3000`, dan IP LAN.
+- CORS backend hanya mengizinkan origin port `3000` pada host lokal/LAN yang dikonfigurasi di `main.py`.

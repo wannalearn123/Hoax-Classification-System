@@ -55,9 +55,8 @@ df_turnbackhoax = pd.read_excel(TURNBACKHOAX, index_col="index")
 df_hoax = pd.read_csv(ALT_HOAX).rename(columns={"body_text": "cleaned"})
 
 # recover missing 'cleaned' from 'raw narasi' BEFORE dropna (validated: 3879/3879 rows recoverable)
-if "raw narasi" in df_turnbackhoax.columns:
-    df_turnbackhoax["cleaned"] = df_turnbackhoax["cleaned"].fillna(
-        df_turnbackhoax["raw narasi"])
+df_turnbackhoax["cleaned"] = df_turnbackhoax["cleaned"].fillna(
+    df_turnbackhoax["raw narasi"])
 
 for df in [df_cnn, df_kompas, df_tempo, df_turnbackhoax, df_hoax]:
     df.dropna(subset=["cleaned"], inplace=True)

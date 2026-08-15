@@ -41,7 +41,7 @@ async def classify_hoax(payload: str = Body(media_type="text/plain")):
     classified = classify(word)[0]
     query = q_extractor(word)
     news = cnn_indo(query)
-    cross_val = "Yes" if validate(query, news) else "No"
+    cross_val = "Yes" if validate(query, news) > 0.7 else "No"
     score = classified["score"] * 100
     result = classified["label"]
 

@@ -17,6 +17,24 @@
   --color-border: #1e2a4a;
 }
 
+/* Light mode: apply class .light on <html> to override the dark tokens */
+.light {
+  --color-surface-900: #f4f6fb;
+  --color-surface-800: #eef1f8;
+  --color-surface-700: #e2e7f1;
+  --color-surface-600: #d4dbe8;
+  --color-surface-500: #bcc7da;
+  --color-accent: #00b37d;
+  --color-accent-dim: #008f66;
+  --color-danger: #e0454f;
+  --color-danger-dim: #c63a44;
+  --color-warn: #f59a0b;
+  --color-text-primary: #1a2233;
+  --color-text-secondary: #4a5678;
+  --color-text-muted: #7b8ab8;
+  --color-border: #d4dbe8;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-surface-500) transparent;

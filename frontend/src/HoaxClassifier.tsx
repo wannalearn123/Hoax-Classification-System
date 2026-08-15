@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { Moon, Sun } from "lucide-react";
 import type { ClassificationResult, InputMode } from "./types";
 import { InputPanel } from "./components/InputPanel";
 import { OutputPanel } from "./components/OutputPanel";
@@ -12,6 +13,7 @@ export function HoaxClassifier() {
   const [result, setResult] = useState<ClassificationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [jsonRaw, setJsonRaw] = useState<string>("");
+  const [isDark, setIsDark] = useState(true);
 
   /** Mengganti mode input sekaligus mengosongkan seluruh state yang berkaitan. */
   const handleModeSwitch = useCallback((newMode: InputMode) => {
@@ -119,6 +121,14 @@ export function HoaxClassifier() {
   const hasInput = mode === "text" ? textInput.trim().length > 0 : !!imagePreview;
   const canSubmit = hasInput && !loading;
 
+  const toggleTheme = useCallback(() => {
+    setIsDark((prev) => {
+      const next = !prev;
+      document.documentElement.classList.toggle("light", !next);
+      return next;
+    });
+  }, []);
+
   return (
     <div className="noise-bg min-h-screen relative flex flex-col">
       {/* Dekorasi latar belakang */}
@@ -142,9 +152,15 @@ export function HoaxClassifier() {
               <p className="text-s text-text-secondary text-left mt-0.5">Sistem Klasifikasi Hoax</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-text-muted">
-            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            Model Aktif
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+              className="p-2 rounded-lg border border-border text-text-secondary hover:text-text-primary hover:bg-surface-800 transition-colors"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </header>

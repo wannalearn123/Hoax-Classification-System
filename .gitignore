@@ -63,4 +63,4 @@ config.local.yaml
 *.sqlite3
 *.db
 
-AGENT.md
+AGENTS.md

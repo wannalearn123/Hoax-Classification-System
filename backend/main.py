@@ -13,28 +13,22 @@ from fetch import cnn_indo
 
 app = FastAPI()
 
-hostname = socket.gethostname()
-ip_address = socket.gethostbyname(hostname)
+# hostname = socket.gethostname()
+# ip_address = socket.gethostbyname(hostname)
 
-origins = ["http://localhost:3000",
-           "http://127.0.0.1:3000", f"http://{ip_address}:3000"]
+# origins = ["http://localhost:3000",
+#            "http://127.0.0.1:3000", f"http://{ip_address}:3000"]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
-
-@app.get("/")
-def read_root():
-    return {"title": "Classifying Hoax through Text & Image"}
 
 # verification through text
-
-
 @app.post("/predict_word")
 async def classify_hoax(payload: str = Body(media_type="text/plain")):
     word = clean(payload)
@@ -84,3 +78,6 @@ async def extract_word(file: UploadFile):
     img = Image.open(io.BytesIO(content))
     text = pytesseract.image_to_string(img)
     return clean(text)
+
+
+app.frontend("/", directory="../frontend/dist")

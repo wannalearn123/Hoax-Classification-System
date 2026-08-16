@@ -71,7 +71,9 @@ export function HoaxClassifier() {
     setJsonRaw("");
 
     try {
-      const url = `http://${window.location.hostname}:8000`;
+      const url = ""; // const url = process.env.SAME_ORIGIN === "true"
+      //   ? ""
+      //   : `http://${window.location.hostname}:8000`;
       let finalResult: ClassificationResult | { error?: string };
 
       if (mode === "text") {

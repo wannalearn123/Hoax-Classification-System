@@ -42,6 +42,46 @@ https://github.com/tesseract-ocr/tesseract
 
 ---
 
+## Instalasi Dependensi Backend / Installing Backend Dependencies
+
+Semua paket Python backend tercantum di `backend/requirements.txt`. Sebaiknya gunakan virtualenv agar tidak mengganggu Python sistem.
+
+Recommended — create & activate a virtualenv, then install:
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Paket yang terpasang / Installed packages (versi di-pin di `requirements.txt`):
+
+| Paket | Fungsi |
+|-------|--------|
+| `fastapi` | Framework API / web framework |
+| `uvicorn[standard]` | ASGI server (jalankan `fastapi dev` / run the app) |
+| `torch` | PyTorch runtime untuk model |
+| `transformers` | Memuat model & tokenizer HuggingFace |
+| `yake` | Ekstraksi kata kunci untuk query berita |
+| `requests` | Memanggil API CNN Indonesia |
+| `beautifulsoup4` | Parsing HTML (scraper `kompas`) |
+| `pytesseract` | OCR via Tesseract |
+| `pillow` | Membaca gambar pada `/predict_pict` |
+| `python-multipart` | Parsing upload file (UploadFile) |
+
+> `tesseract` (sistem, bukan pip) juga wajib untuk OCR — lihat bagian Prasyarat.
+> Transitive deps (`regex`, `tokenizers`, `safetensors`, `huggingface-hub`, `numpy`) ikut terinstal otomatis lewat `torch`/`transformers`.
+
+Periksa / Verify the install:
+
+```bash
+pip show fastapi torch transformers yake
+```
+
+---
+
 ## Menjalankan Backend / Running the Backend
 
 ```bash
